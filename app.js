@@ -8,6 +8,7 @@
   let appData = null;
   let currentModule = "overview";
   let decisions = {}; // { "featureKey": "TAK"|"NIE"|"PÓŹNIEJ" }
+  let statuses = {}; // { "featureKey": "OGARNIJ"|"W_REALIZACJI"|"GOTOWE" }
   let filters = {
     priorities: ["KRYTYCZNE", "WAŻNE", "PRZYDATNE", "OPCJONALNE"],
     complexities: ["Niska", "Średnia", "Wysoka"],
@@ -79,17 +80,28 @@
   function getDecisionCounts() {
     var tak = 0,
       nie = 0,
-      pozniej = 0;
+      pozniej = 0,
+      ogarnij = 0,
+      wRealizacji = 0,
+      gotowe = 0;
     Object.values(decisions).forEach(function (d) {
       if (d === "TAK") tak++;
       else if (d === "NIE") nie++;
       else if (d === "PÓŹNIEJ") pozniej++;
+    });
+    Object.values(statuses).forEach(function (s) {
+      if (s === "OGARNIJ") ogarnij++;
+      else if (s === "W_REALIZACJI") wRealizacji++;
+      else if (s === "GOTOWE") gotowe++;
     });
     return {
       tak: tak,
       nie: nie,
       pozniej: pozniej,
       total: tak + nie + pozniej,
+      ogarnij: ogarnij,
+      wRealizacji: wRealizacji,
+      gotowe: gotowe,
     };
   }
 
@@ -297,7 +309,9 @@
       mod.icon +
       "</span>" +
       escapeHtml(mod.name) +
-      "</h1></div>";
+      '</h1><button class="ogarnij-module-btn" data-ogarnij-module="' + mod.id + '" title="Kopiuj wszystkie funkcje TAK z tego modułu do schowka">' +
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>' +
+      'OGARNIJ MODUŁ</button></div>';
 
     // Filters bar
     html += renderFiltersBar();
@@ -417,6 +431,7 @@
   function renderFeatureRow(mod, sub, feat, idx) {
     var key = getFeatureKey(mod.id, sub.id, idx);
     var dec = decisions[key] || "";
+    var status = statuses[key] || "";
 
     var priorityClass = {
       KRYTYCZNE: "badge-krytyczne",
@@ -431,13 +446,25 @@
       Wysoka: "badge-wysoka",
     };
 
-    var html =
-      '<div class="feature-row" data-feature-key="' + key + '">';
+    var statusBadge = "";
+    if (status === "W_REALIZACJI") {
+      statusBadge = '<span class="badge badge-realizacja">⚡ W realizacji</span>';
+    } else if (status === "GOTOWE") {
+      statusBadge = '<span class="badge badge-gotowe">✅ Gotowe</span>';
+    } else if (status === "OGARNIJ") {
+      statusBadge = '<span class="badge badge-ogarnij">📨 Zlecone</span>';
+    }
 
-    // Name + notes
+    var html =
+      '<div class="feature-row' + (status ? ' has-status-' + status.toLowerCase().replace('_','-') : '') + '" data-feature-key="' + key + '">';
+
+    // Name + notes + status
     html += '<div class="feature-name-col"><span class="feature-name">' + escapeHtml(feat.name) + "</span>";
     if (feat.notes) {
       html += '<span class="feature-note">' + escapeHtml(feat.notes) + "</span>";
+    }
+    if (statusBadge) {
+      html += '<div class="feature-status-row">' + statusBadge + '</div>';
     }
     html += "</div>";
 
@@ -478,6 +505,16 @@
       key +
       '">PÓŹNIEJ ⏳</button>';
     html += "</div>";
+
+    // OGARNIJ button (visible only when TAK is selected and not yet in status)
+    var showOgarnij = dec === "TAK" && status !== "W_REALIZACJI" && status !== "GOTOWE";
+    html += '<div class="ogarnij-col">';
+    if (showOgarnij) {
+      html += '<button class="ogarnij-btn" data-ogarnij-key="' + key + '" data-ogarnij-module="' + mod.name + '" data-ogarnij-sub="' + sub.name + '" data-ogarnij-feat="' + escapeHtml(feat.name) + '" data-ogarnij-priority="' + feat.priority + '" data-ogarnij-complexity="' + feat.complexity + '" title="Kopiuj komendę do czatu">' +
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>' +
+        'OGARNIJ!</button>';
+    }
+    html += '</div>';
 
     html += "</div>";
     return html;
@@ -590,6 +627,68 @@
       theme === "dark"
         ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
         : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+
+  // ===== CLIPBOARD & TOAST =====
+  function copyToClipboard(text, triggerEl) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function() {
+        showToast("Skopiowano do schowka — wklej w czat Perplexity", "success");
+        flashButton(triggerEl);
+      }).catch(function() {
+        fallbackCopy(text, triggerEl);
+      });
+    } else {
+      fallbackCopy(text, triggerEl);
+    }
+  }
+
+  function fallbackCopy(text, triggerEl) {
+    var textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand("copy");
+      showToast("Skopiowano do schowka — wklej w czat Perplexity", "success");
+      flashButton(triggerEl);
+    } catch (err) {
+      showToast("Nie uda\u0142o si\u0119 skopiowa\u0107. Skopiuj r\u0119cznie:", "warning");
+      prompt("Skopiuj t\u0119 komend\u0119:", text);
+    }
+    document.body.removeChild(textarea);
+  }
+
+  function flashButton(el) {
+    if (!el) return;
+    el.classList.add("ogarnij-sent");
+    var origText = el.innerHTML;
+    el.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>Skopiowano!';
+    setTimeout(function() {
+      el.innerHTML = origText;
+      el.classList.remove("ogarnij-sent");
+    }, 2000);
+  }
+
+  function showToast(message, type) {
+    var existing = document.querySelector(".toast");
+    if (existing) existing.remove();
+
+    var toast = document.createElement("div");
+    toast.className = "toast toast-" + (type || "info");
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(function() {
+      toast.classList.add("toast-visible");
+    });
+
+    setTimeout(function() {
+      toast.classList.remove("toast-visible");
+      setTimeout(function() { toast.remove(); }, 300);
+    }, 3000);
   }
 
   // ===== EVENT LISTENERS =====
@@ -720,6 +819,61 @@
       // Export button
       if (e.target.closest("#exportBtn")) {
         exportDecisions();
+        return;
+      }
+
+      // OGARNIJ single feature button
+      var ogarnijBtn = e.target.closest(".ogarnij-btn");
+      if (ogarnijBtn) {
+        var oKey = ogarnijBtn.getAttribute("data-ogarnij-key");
+        var oModule = ogarnijBtn.getAttribute("data-ogarnij-module");
+        var oSub = ogarnijBtn.getAttribute("data-ogarnij-sub");
+        var oFeat = ogarnijBtn.getAttribute("data-ogarnij-feat");
+        var oPriority = ogarnijBtn.getAttribute("data-ogarnij-priority");
+        var oComplexity = ogarnijBtn.getAttribute("data-ogarnij-complexity");
+
+        var command = "[ORDERFLOW] Zrealizuj funkcj\u0119:\n" +
+          "Modu\u0142: " + oModule + "\n" +
+          "Submodu\u0142: " + oSub + "\n" +
+          "Funkcja: " + oFeat + "\n" +
+          "Priorytet: " + oPriority + " | Z\u0142o\u017cono\u015b\u0107: " + oComplexity;
+
+        copyToClipboard(command, ogarnijBtn);
+        statuses[oKey] = "OGARNIJ";
+        renderContent();
+        renderHeaderStats();
+        return;
+      }
+
+      // OGARNIJ MODULE button
+      var ogarnijModBtn = e.target.closest(".ogarnij-module-btn");
+      if (ogarnijModBtn) {
+        var modId = ogarnijModBtn.getAttribute("data-ogarnij-module");
+        var targetMod = appData.modules.find(function(m) { return m.id === modId; });
+        if (!targetMod) return;
+
+        var lines = [];
+        var count = 0;
+        targetMod.submodules.forEach(function(sub) {
+          sub.features.forEach(function(feat, idx) {
+            var fKey = getFeatureKey(targetMod.id, sub.id, idx);
+            if (decisions[fKey] === "TAK" && statuses[fKey] !== "W_REALIZACJI" && statuses[fKey] !== "GOTOWE") {
+              lines.push("  \u2022 " + sub.name + " \u2192 " + feat.name + " [" + feat.priority + ", " + feat.complexity + "]");
+              statuses[fKey] = "OGARNIJ";
+              count++;
+            }
+          });
+        });
+
+        if (count === 0) {
+          showToast("Brak funkcji TAK do zlecenia w tym module", "warning");
+          return;
+        }
+
+        var moduleCommand = "[ORDERFLOW] Zrealizuj modu\u0142: " + targetMod.name + " (" + count + " funkcji)\n" + lines.join("\n");
+        copyToClipboard(moduleCommand, ogarnijModBtn);
+        renderContent();
+        renderHeaderStats();
         return;
       }
     });
