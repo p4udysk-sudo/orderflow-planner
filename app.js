@@ -18,6 +18,60 @@
 
   // ===== INIT =====
   function init() {
+    // Inject additional CSS for new sections
+    var styleTag = document.createElement("style");
+    styleTag.textContent = [
+      ".api-analysis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px;}",
+      ".api-stat-card{background:var(--surface-2,rgba(255,255,255,0.06));border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:4px;}",
+      ".api-stat-label{font-size:11px;color:var(--text-secondary,#8a9bb0);text-transform:uppercase;letter-spacing:.05em;}",
+      ".api-stat-value{font-size:18px;font-weight:700;color:var(--accent,#4a9eff);}",
+      ".api-stat-sub{font-size:11px;color:var(--text-secondary,#8a9bb0);}",
+      ".integrations-mini-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:10px;}",
+      ".integration-mini-card{background:var(--surface-2,rgba(255,255,255,0.06));border-radius:7px;padding:8px 12px;text-align:center;}",
+      ".integration-mini-name{font-size:11px;color:var(--text-secondary,#8a9bb0);margin-bottom:4px;}",
+      ".integration-mini-count{font-size:22px;font-weight:700;color:var(--accent,#4a9eff);}",
+      ".panel-sections-list{list-style:none;margin:10px 0 0 0;padding:0;display:flex;flex-direction:column;gap:6px;}",
+      ".panel-sections-list li{padding:7px 12px;background:var(--surface-2,rgba(255,255,255,0.06));border-radius:6px;font-size:13px;color:var(--text-primary,#e2e8f0);border-left:3px solid var(--accent,#4a9eff);}",
+      ".ui-features-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}",
+      ".ui-feature-tag{background:rgba(74,158,255,0.12);border:1px solid rgba(74,158,255,0.3);color:var(--accent,#4a9eff);border-radius:20px;padding:4px 10px;font-size:12px;}",
+      ".account-config-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:12px;}",
+      ".account-config-group{background:var(--surface-2,rgba(255,255,255,0.06));border-radius:8px;padding:12px 14px;}",
+      ".account-config-group-title{font-size:11px;font-weight:600;color:var(--text-secondary,#8a9bb0);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}",
+      ".status-dot-row{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:13px;color:var(--text-primary,#e2e8f0);}",
+      ".status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}",
+      ".config-tag-list{display:flex;flex-wrap:wrap;gap:5px;}",
+      ".config-tag{background:var(--surface-3,rgba(255,255,255,0.1));border-radius:5px;padding:3px 8px;font-size:12px;color:var(--text-primary,#e2e8f0);}",
+      ".config-kv{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:13px;border-bottom:1px solid var(--border,rgba(255,255,255,0.07));}",
+      ".config-kv:last-child{border-bottom:none;}",
+      ".config-kv-label{color:var(--text-secondary,#8a9bb0);}",
+      ".config-kv-value{color:var(--text-primary,#e2e8f0);font-weight:500;}",
+      ".business-flows-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;}",
+      ".business-flow-item{border:1px solid var(--border,rgba(255,255,255,0.1));border-radius:8px;overflow:hidden;}",
+      ".business-flow-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface-2,rgba(255,255,255,0.06));cursor:pointer;user-select:none;}",
+      ".business-flow-title{font-size:14px;font-weight:600;color:var(--text-primary,#e2e8f0);}",
+      ".business-flow-content{padding:10px 14px;display:none;}",
+      ".business-flow-item.expanded .business-flow-content{display:block;}",
+      ".business-flow-item.expanded .business-flow-chevron{transform:rotate(180deg);}",
+      ".business-flow-chevron{transition:transform .2s;color:var(--text-secondary,#8a9bb0);}",
+      ".flow-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;}",
+      ".flow-step{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:13px;color:var(--text-primary,#e2e8f0);border-bottom:1px solid var(--border,rgba(255,255,255,0.05));}",
+      ".flow-step:last-child{border-bottom:none;}",
+      ".flow-step-num{width:22px;height:22px;border-radius:50%;background:var(--accent,#4a9eff);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}",
+      ".api-mapping-card{margin:12px 0 0 0;border:1px solid rgba(99,102,241,0.4);border-left:4px solid #6366f1;border-radius:8px;overflow:hidden;}",
+      ".api-mapping-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:rgba(99,102,241,0.08);cursor:pointer;user-select:none;}",
+      ".api-mapping-title{font-size:13px;font-weight:600;color:#818cf8;display:flex;align-items:center;gap:6px;}",
+      ".api-mapping-content{padding:12px 14px;display:none;}",
+      ".api-mapping-card.expanded .api-mapping-content{display:block;}",
+      ".api-mapping-card.expanded .api-mapping-chevron{transform:rotate(180deg);}",
+      ".api-mapping-chevron{transition:transform .2s;color:#818cf8;}",
+      ".api-methods-list{list-style:none;margin:0 0 10px 0;padding:0;display:flex;flex-direction:column;gap:4px;}",
+      ".api-method-item{padding:5px 8px;background:rgba(99,102,241,0.06);border-radius:5px;font-size:12px;color:var(--text-primary,#e2e8f0);font-family:monospace;}",
+      ".bl-info-cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}",
+      ".bl-info-card{background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);border-radius:6px;padding:7px 10px;font-size:12px;color:var(--text-secondary,#8a9bb0);}",
+      ".bl-info-card strong{color:#818cf8;display:block;margin-bottom:3px;}"
+    ].join("\n");
+    document.head.appendChild(styleTag);
+
     // Try to use embedded DATA constant as primary source
     if (typeof DATA !== "undefined") {
       appData = DATA;
@@ -247,36 +301,212 @@
     html += "</ul></div>";
     html += "</div>";
 
-    // Implementation Progress
-    html += '<div class="section-card implementation-progress">';
-    html += '<div class="section-title">🚀 Postęp realizacji systemu</div>';
-    html += '<div class="impl-phases">';
+    // ===== NEW SECTION 1: API Analysis =====
+    if (appData.api_analysis) {
+      var api = appData.api_analysis;
+      html += '<div class="section-card">';
+      html += '<div class="section-title">Analiza API Base.com</div>';
+      html += '<div class="api-analysis-grid">';
+      html += '<div class="api-stat-card"><span class="api-stat-label">Metody API</span><span class="api-stat-value">' + escapeHtml(String(api.total_methods)) + '</span><span class="api-stat-sub">łącznie dostępnych</span></div>';
+      html += '<div class="api-stat-card"><span class="api-stat-label">Kategorie</span><span class="api-stat-value">' + escapeHtml(String(api.categories)) + '</span><span class="api-stat-sub">grup metod</span></div>';
+      html += '<div class="api-stat-card"><span class="api-stat-label">Rate Limit</span><span class="api-stat-value">' + escapeHtml(api.rate_limit) + '</span><span class="api-stat-sub">maks. żądań</span></div>';
+      html += '<div class="api-stat-card"><span class="api-stat-label">Autentykacja</span><span class="api-stat-value" style="font-size:13px;margin-top:2px;">' + escapeHtml(api.auth) + '</span><span class="api-stat-sub">format nagłówka</span></div>';
+      html += '<div class="api-stat-card"><span class="api-stat-label">Endpoint</span><span class="api-stat-value" style="font-size:11px;margin-top:2px;word-break:break-all;">' + escapeHtml(api.base_url) + '</span><span class="api-stat-sub">connector.php</span></div>';
+      if (api.last_updated) {
+        html += '<div class="api-stat-card"><span class="api-stat-label">Aktualizacja</span><span class="api-stat-value" style="font-size:14px;">' + escapeHtml(api.last_updated) + '</span><span class="api-stat-sub">data analizy</span></div>';
+      }
+      html += '</div>';
+      html += '</div>';
+    }
 
-    var phases = [
-      {name: 'Schemat bazy danych (ERD)', status: 'done', detail: '19 tabel: orders, products, customers, users, audit_log, inventory...'},
-      {name: 'Backend FastAPI + SQLAlchemy', status: 'done', detail: 'Struktura projektu, modele ORM, Alembic migracje, konfiguracja'},
-      {name: 'REST API (CRUD)', status: 'done', detail: '20 endpointów: auth, orders, products, customers, statuses'},
-      {name: 'Autentykacja JWT + RBAC', status: 'done', detail: 'Rejestracja, logowanie, role (admin/manager/operator/viewer)'},
-      {name: 'Audit Log', status: 'done', detail: 'Pełna historia zmian każdej encji — kluczowa przewaga nad BaseLinker'},
-      {name: 'Panel admina React', status: 'pending', detail: 'Routing, layout, dashboard, tabele, formularze'},
-      {name: 'Docker + PostgreSQL', status: 'done', detail: 'docker-compose.yml, Dockerfile, .env konfiguracja'},
-      {name: 'Hosting & deployment', status: 'pending', detail: 'Do ustalenia'},
-    ];
+    // ===== NEW SECTION 2: Panel Analysis =====
+    if (appData.panel_analysis) {
+      var panel = appData.panel_analysis;
+      html += '<div class="section-card">';
+      html += '<div class="section-title">Struktura panelu Base.com</div>';
 
-    phases.forEach(function(phase) {
-      var icon = phase.status === 'done' ? '✅' : phase.status === 'progress' ? '⚡' : '⏳';
-      var cls = 'impl-phase impl-' + phase.status;
-      html += '<div class="' + cls + '">';
-      html += '<span class="impl-icon">' + icon + '</span>';
-      html += '<div class="impl-info">';
-      html += '<div class="impl-name">' + escapeHtml(phase.name) + '</div>';
-      html += '<div class="impl-detail">' + escapeHtml(phase.detail) + '</div>';
-      html += '</div></div>';
-    });
+      if (panel.main_sections && panel.main_sections.length) {
+        html += '<ul class="panel-sections-list">';
+        panel.main_sections.forEach(function (sec) {
+          html += '<li>' + escapeHtml(sec) + '</li>';
+        });
+        html += '</ul>';
+      }
 
-    html += '</div>';
-    html += '<div class="impl-summary">Stack: Python 3.12 + FastAPI + PostgreSQL 16 + SQLAlchemy 2.0 + React</div>';
-    html += '</div>';
+      if (panel.integrations_count) {
+        var ic = panel.integrations_count;
+        html += '<div style="margin-top:14px;"><div style="font-size:11px;font-weight:600;color:var(--text-secondary,#8a9bb0);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Liczba integracji</div>';
+        html += '<div class="integrations-mini-grid">';
+        var icLabels = {
+          marketplace: "Marketplace",
+          stores: "Sklepy",
+          couriers: "Kurierzy",
+          fulfillment: "Fulfillment",
+          accounting_erp: "Księgowość",
+          wholesalers: "Hurtownie",
+          total: "Łącznie"
+        };
+        var icKeys = Object.keys(ic);
+        icKeys.forEach(function (k) {
+          if (k === "total") return; // show total separately
+          html += '<div class="integration-mini-card"><div class="integration-mini-name">' + escapeHtml(icLabels[k] || k) + '</div><div class="integration-mini-count">' + ic[k] + '</div></div>';
+        });
+        if (ic.total !== undefined) {
+          html += '<div class="integration-mini-card" style="background:rgba(74,158,255,0.12);border:1px solid rgba(74,158,255,0.3);"><div class="integration-mini-name" style="color:var(--accent,#4a9eff);">Łącznie</div><div class="integration-mini-count" style="font-size:26px;">' + ic.total + '</div></div>';
+        }
+        html += '</div></div>';
+      }
+
+      if (panel.ui_features && panel.ui_features.length) {
+        html += '<div style="margin-top:14px;font-size:11px;font-weight:600;color:var(--text-secondary,#8a9bb0);text-transform:uppercase;letter-spacing:.05em;">Funkcje UI</div>';
+        html += '<div class="ui-features-tags">';
+        panel.ui_features.forEach(function (f) {
+          html += '<span class="ui-feature-tag">' + escapeHtml(f) + '</span>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
+    }
+
+    // ===== NEW SECTION 3: Account Config =====
+    if (appData.account_config) {
+      var cfg = appData.account_config;
+      html += '<div class="section-card">';
+      html += '<div class="section-title">Konfiguracja konta</div>';
+      html += '<div class="account-config-groups">';
+
+      // Basic info group
+      html += '<div class="account-config-group">';
+      html += '<div class="account-config-group-title">Katalog i magazyn</div>';
+      if (cfg.inventory_id !== undefined) {
+        html += '<div class="config-kv"><span class="config-kv-label">Katalog (ID)</span><span class="config-kv-value">' + escapeHtml(String(cfg.inventory_id)) + '</span></div>';
+      }
+      if (cfg.inventory_name) {
+        html += '<div class="config-kv"><span class="config-kv-label">Nazwa katalogu</span><span class="config-kv-value">' + escapeHtml(cfg.inventory_name) + '</span></div>';
+      }
+      if (cfg.warehouse_id !== undefined) {
+        html += '<div class="config-kv"><span class="config-kv-label">Magazyn (ID)</span><span class="config-kv-value">' + escapeHtml(String(cfg.warehouse_id)) + '</span></div>';
+      }
+      if (cfg.warehouse_name) {
+        html += '<div class="config-kv"><span class="config-kv-label">Nazwa magazynu</span><span class="config-kv-value">' + escapeHtml(cfg.warehouse_name) + '</span></div>';
+      }
+      if (cfg.currency) {
+        html += '<div class="config-kv"><span class="config-kv-label">Waluta</span><span class="config-kv-value">' + escapeHtml(cfg.currency) + '</span></div>';
+      }
+      if (cfg.default_language) {
+        html += '<div class="config-kv"><span class="config-kv-label">Język</span><span class="config-kv-value">' + escapeHtml(cfg.default_language) + '</span></div>';
+      }
+      html += '</div>';
+
+      // Order statuses group
+      if (cfg.order_statuses && cfg.order_statuses.length) {
+        html += '<div class="account-config-group">';
+        html += '<div class="account-config-group-title">Statusy zamówień</div>';
+        cfg.order_statuses.forEach(function (s) {
+          html += '<div class="status-dot-row"><span class="status-dot" style="background:' + escapeHtml(s.color) + ';"></span><span>' + escapeHtml(s.name) + '</span></div>';
+        });
+        html += '</div>';
+      }
+
+      // Return statuses group
+      if (cfg.return_statuses && cfg.return_statuses.length) {
+        html += '<div class="account-config-group">';
+        html += '<div class="account-config-group-title">Statusy zwrotów</div>';
+        cfg.return_statuses.forEach(function (s) {
+          html += '<div class="status-dot-row"><span class="status-dot" style="background:' + escapeHtml(s.color) + ';"></span><span>' + escapeHtml(s.name) + '</span></div>';
+        });
+        html += '</div>';
+      }
+
+      // Return reasons
+      if (cfg.return_reasons && cfg.return_reasons.length) {
+        html += '<div class="account-config-group">';
+        html += '<div class="account-config-group-title">Powody zwrotów</div>';
+        html += '<div class="config-tag-list">';
+        cfg.return_reasons.forEach(function (r) {
+          html += '<span class="config-tag">' + escapeHtml(r) + '</span>';
+        });
+        html += '</div>';
+        html += '</div>';
+      }
+
+      // Document & invoice series
+      html += '<div class="account-config-group">';
+      html += '<div class="account-config-group-title">Serie dokumentów</div>';
+      if (cfg.document_series && cfg.document_series.length) {
+        html += '<div class="config-kv-label" style="font-size:11px;margin-bottom:4px;">Magazynowe</div>';
+        html += '<div class="config-tag-list" style="margin-bottom:8px;">';
+        cfg.document_series.forEach(function (d) {
+          html += '<span class="config-tag">' + escapeHtml(d) + '</span>';
+        });
+        html += '</div>';
+      }
+      if (cfg.invoice_series && cfg.invoice_series.length) {
+        html += '<div class="config-kv-label" style="font-size:11px;margin-bottom:4px;">Fakturowe</div>';
+        html += '<div class="config-tag-list">';
+        cfg.invoice_series.forEach(function (d) {
+          html += '<span class="config-tag">' + escapeHtml(d) + '</span>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+
+      // Pick&Pack carts
+      if (cfg.pickpack_carts && cfg.pickpack_carts.length) {
+        html += '<div class="account-config-group">';
+        html += '<div class="account-config-group-title">Wózki Pick&Pack</div>';
+        html += '<div class="config-tag-list">';
+        cfg.pickpack_carts.forEach(function (c) {
+          html += '<span class="config-tag">' + escapeHtml(c) + '</span>';
+        });
+        html += '</div>';
+        html += '</div>';
+      }
+
+      // Printout templates
+      if (cfg.printout_templates && cfg.printout_templates.length) {
+        html += '<div class="account-config-group">';
+        html += '<div class="account-config-group-title">Szablony wydruków</div>';
+        html += '<div class="config-tag-list">';
+        cfg.printout_templates.forEach(function (t) {
+          html += '<span class="config-tag">' + escapeHtml(t) + '</span>';
+        });
+        html += '</div>';
+        html += '</div>';
+      }
+
+      html += '</div>'; // end account-config-groups
+      html += '</div>'; // end section-card
+    }
+
+    // ===== NEW SECTION 4: Business Flows =====
+    if (appData.business_flows && appData.business_flows.length) {
+      html += '<div class="section-card">';
+      html += '<div class="section-title">Przepływy biznesowe</div>';
+      html += '<div class="business-flows-list">';
+      appData.business_flows.forEach(function (flow, flowIdx) {
+        html += '<div class="business-flow-item" data-flow-idx="' + flowIdx + '">';
+        html += '<div class="business-flow-header" role="button" tabindex="0" aria-expanded="false">';
+        html += '<span class="business-flow-title">⬡ ' + escapeHtml(flow.name) + '</span>';
+        html += '<svg class="business-flow-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+        html += '</div>';
+        html += '<div class="business-flow-content">';
+        html += '<ul class="flow-steps">';
+        if (flow.steps && flow.steps.length) {
+          flow.steps.forEach(function (step, stepIdx) {
+            // Strip leading "N. " numbering from step text since we show our own number
+            var stepText = step.replace(/^\d+\.\s*/, "");
+            html += '<li class="flow-step"><span class="flow-step-num">' + (stepIdx + 1) + '</span><span>' + escapeHtml(stepText) + '</span></li>';
+          });
+        }
+        html += '</ul>';
+        html += '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+      html += '</div>';
+    }
 
     // Module Decision Progress
     html += '<div class="section-card">';
@@ -343,6 +573,59 @@
       '</h1><button class="ogarnij-module-btn" data-ogarnij-module="' + mod.id + '" title="Kopiuj wszystkie funkcje TAK z tego modułu do schowka">' +
       '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>' +
       'OGARNIJ MODUŁ</button></div>';
+
+    // ===== API MAPPING SECTION (collapsible, before filters) =====
+    if (mod.api_mapping) {
+      var am = mod.api_mapping;
+      html += '<div class="api-mapping-card" data-api-card="' + mod.id + '">';
+      html += '<div class="api-mapping-header" role="button" tabindex="0" aria-expanded="false" data-api-toggle="' + mod.id + '">';
+      html += '<span class="api-mapping-title">';
+      html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16M6.343 17.657l-4-4 4-4M17.657 17.657l4-4-4-4"/></svg>';
+      html += 'API Base.com — metody i przepływy';
+      html += '</span>';
+      html += '<svg class="api-mapping-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+      html += '</div>';
+      html += '<div class="api-mapping-content">';
+
+      if (am.api_methods && am.api_methods.length) {
+        html += '<div style="font-size:11px;font-weight:600;color:#818cf8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Metody API (' + am.api_methods.length + ')</div>';
+        html += '<ul class="api-methods-list">';
+        am.api_methods.forEach(function (method) {
+          html += '<li class="api-method-item">' + escapeHtml(method) + '</li>';
+        });
+        html += '</ul>';
+      }
+
+      // Render extra bl_* fields as info cards
+      var blFields = [];
+      var blFieldLabels = {
+        "bl_flow": "Przepływ statusów",
+        "bl_structure": "Struktura danych",
+        "bl_limits": "Limity API",
+        "bl_panel": "Panel BaseLinker",
+        "bl_doc_types": "Typy dokumentów",
+        "bl_missing": "Brakujące funkcje",
+        "bl_config": "Konfiguracja",
+        "bl_integrations": "Integracje",
+        "bl_courier_form_example": "Formularz kurierski",
+        "bl_couriers_pl": "Kurierzy PL"
+      };
+      Object.keys(am).forEach(function (k) {
+        if (k !== "api_methods" && am[k]) {
+          blFields.push({ key: k, label: blFieldLabels[k] || k, value: am[k] });
+        }
+      });
+      if (blFields.length) {
+        html += '<div class="bl-info-cards">';
+        blFields.forEach(function (field) {
+          html += '<div class="bl-info-card"><strong>' + escapeHtml(field.label) + '</strong>' + escapeHtml(String(field.value)) + '</div>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div>'; // end api-mapping-content
+      html += '</div>'; // end api-mapping-card
+    }
 
     // Filters bar
     html += renderFiltersBar();
@@ -776,13 +1059,36 @@
 
     // Delegated events on main
     main.addEventListener("click", function (e) {
+      // Business flow toggle (overview)
+      var flowHeader = e.target.closest(".business-flow-header");
+      if (flowHeader) {
+        var flowItem = flowHeader.closest(".business-flow-item");
+        flowItem.classList.toggle("expanded");
+        var isExpanded = flowItem.classList.contains("expanded");
+        flowHeader.setAttribute("aria-expanded", isExpanded);
+        return;
+      }
+
+      // API mapping card toggle (module view)
+      var apiToggleEl = e.target.closest("[data-api-toggle]");
+      if (apiToggleEl) {
+        var cardId = apiToggleEl.getAttribute("data-api-toggle");
+        var apiCard = document.querySelector('[data-api-card="' + cardId + '"]');
+        if (apiCard) {
+          apiCard.classList.toggle("expanded");
+          var isApiExpanded = apiCard.classList.contains("expanded");
+          apiToggleEl.setAttribute("aria-expanded", isApiExpanded);
+        }
+        return;
+      }
+
       // Submodule toggle
       var subHeader = e.target.closest(".submodule-header");
       if (subHeader) {
         var section = subHeader.closest(".submodule-section");
         section.classList.toggle("expanded");
-        var isExpanded = section.classList.contains("expanded");
-        subHeader.setAttribute("aria-expanded", isExpanded);
+        var isSubExpanded = section.classList.contains("expanded");
+        subHeader.setAttribute("aria-expanded", isSubExpanded);
         return;
       }
 
@@ -898,13 +1204,26 @@
       }
     });
 
-    // Keyboard support for submodule headers
+    // Keyboard support for submodule headers, business flow headers, api mapping headers
     main.addEventListener("keydown", function (e) {
       if (e.key === "Enter" || e.key === " ") {
         var subHeader = e.target.closest(".submodule-header");
         if (subHeader) {
           e.preventDefault();
           subHeader.click();
+          return;
+        }
+        var flowHeader = e.target.closest(".business-flow-header");
+        if (flowHeader) {
+          e.preventDefault();
+          flowHeader.click();
+          return;
+        }
+        var apiToggleKb = e.target.closest("[data-api-toggle]");
+        if (apiToggleKb) {
+          e.preventDefault();
+          apiToggleKb.click();
+          return;
         }
       }
     });
