@@ -768,21 +768,10 @@
           decisions[key] = decision;
         }
 
-        // Update just the row's buttons
-        var row = decBtn.closest(".feature-row");
-        if (row) {
-          row.querySelectorAll(".decision-btn").forEach(function (btn) {
-            btn.className = "decision-btn";
-            var btnDec = btn.getAttribute("data-decision");
-            var currentDec = decisions[key];
-            if (currentDec === btnDec) {
-              if (btnDec === "TAK") btn.classList.add("selected-tak");
-              else if (btnDec === "NIE") btn.classList.add("selected-nie");
-              else if (btnDec === "PÓŹNIEJ") btn.classList.add("selected-pozniej");
-            }
-          });
-        }
-
+        // Re-render to show/hide OGARNIJ button
+        var scrollPos = main.scrollTop;
+        renderContent();
+        main.scrollTop = scrollPos;
         renderHeaderStats();
         return;
       }
