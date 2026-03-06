@@ -40,11 +40,28 @@
   }
 
   function bootstrap() {
+    // Handle hash routing from URL
+    var hash = window.location.hash.replace("#", "");
+    if (hash === "podstawy-v1") {
+      currentModule = "podstawy-v1";
+    }
     renderSidebar();
     renderHeaderStats();
     renderContent();
     setupEventListeners();
     setupThemeToggle();
+    // Listen for hash changes
+    window.addEventListener("hashchange", function () {
+      var newHash = window.location.hash.replace("#", "");
+      if (newHash === "podstawy-v1") {
+        currentModule = "podstawy-v1";
+        searchQuery = "";
+        var si = document.getElementById("searchInput");
+        if (si) si.value = "";
+        renderSidebar();
+        renderContent();
+      }
+    });
   }
 
   // ===== HELPERS =====
@@ -129,6 +146,9 @@
     var nav = document.getElementById("sidebarNav");
     var html =
       '<button class="nav-item' +
+      (currentModule === "podstawy-v1" ? " active" : "") +
+      '" data-module="podstawy-v1"><span class="nav-icon">🚀</span><span class="nav-label">Podstawy v1</span></button>' +
+      '<button class="nav-item' +
       (currentModule === "overview" ? " active" : "") +
       '" data-module="overview"><span class="nav-icon">📊</span><span class="nav-label">Przegląd</span></button>';
 
@@ -182,11 +202,200 @@
   function renderContent() {
     if (searchQuery.length > 0) {
       renderSearchResults();
+    } else if (currentModule === "podstawy-v1") {
+      renderPodstawyV1();
     } else if (currentModule === "overview") {
       renderOverview();
     } else {
       renderModule(currentModule);
     }
+  }
+
+  // ===== PODSTAWY V1 =====
+  function renderPodstawyV1() {
+    var main = document.getElementById("mainContent");
+
+    var styles = '<style>' +
+      '.pv1-wrap { max-width: 1100px; margin: 0 auto; padding: 0 0 40px; }' +
+      '.pv1-hero { margin-bottom: 28px; }' +
+      '.pv1-hero h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 6px; color: var(--text-primary, #f1f5f9); }' +
+      '.pv1-hero p.subtitle { font-size: 0.95rem; color: var(--text-secondary, #94a3b8); margin: 0 0 12px; }' +
+      '.pv1-context { font-size: 0.82rem; color: var(--text-muted, #64748b); background: var(--bg-card, #1e293b); border: 1px solid var(--border, #334155); border-radius: 8px; padding: 10px 14px; display: inline-block; line-height: 1.6; }' +
+      '.pv1-stats-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }' +
+      '.pv1-stat { display: flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; border: 1px solid transparent; }' +
+      '.pv1-stat-green { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.3); color: #4ade80; }' +
+      '.pv1-stat-amber { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #fbbf24; }' +
+      '.pv1-stat-blue { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.3); color: #60a5fa; }' +
+      '.pv1-stat-gray { background: var(--bg-card, #1e293b); border-color: var(--border, #334155); color: var(--text-secondary, #94a3b8); }' +
+      '.pv1-phase { margin-bottom: 32px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border, #334155); }' +
+      '.pv1-phase-header { padding: 14px 20px; display: flex; align-items: center; gap: 10px; }' +
+      '.pv1-phase-header-green { background: rgba(34,197,94,0.15); border-bottom: 1px solid rgba(34,197,94,0.25); }' +
+      '.pv1-phase-header-amber { background: rgba(245,158,11,0.15); border-bottom: 1px solid rgba(245,158,11,0.25); }' +
+      '.pv1-phase-header-blue { background: rgba(59,130,246,0.15); border-bottom: 1px solid rgba(59,130,246,0.25); }' +
+      '.pv1-phase-title { font-size: 1rem; font-weight: 700; color: var(--text-primary, #f1f5f9); }' +
+      '.pv1-phase-badge { font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-left: auto; }' +
+      '.pv1-badge-green { background: rgba(34,197,94,0.2); color: #4ade80; }' +
+      '.pv1-badge-amber { background: rgba(245,158,11,0.2); color: #fbbf24; }' +
+      '.pv1-badge-blue { background: rgba(59,130,246,0.2); color: #60a5fa; }' +
+      '.pv1-table { width: 100%; border-collapse: collapse; background: var(--bg-card, #1e293b); }' +
+      '.pv1-table th { padding: 10px 14px; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted, #64748b); border-bottom: 1px solid var(--border, #334155); }' +
+      '.pv1-table td { padding: 11px 14px; font-size: 0.875rem; color: var(--text-primary, #e2e8f0); border-bottom: 1px solid var(--border-subtle, #1e293b); vertical-align: middle; }' +
+      '.pv1-table tr:last-child td { border-bottom: none; }' +
+      '.pv1-table tr:hover td { background: rgba(255,255,255,0.03); }' +
+      '.pv1-num { font-weight: 700; color: var(--text-muted, #64748b); font-family: monospace; font-size: 0.8rem; white-space: nowrap; }' +
+      '.pv1-feat-name { font-weight: 500; }' +
+      '.pv1-module { font-size: 0.78rem; color: var(--text-muted, #64748b); margin-top: 2px; }' +
+      '.pv1-src { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.73rem; font-weight: 600; white-space: nowrap; }' +
+      '.pv1-src-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }' +
+      '.pv1-src-purple { background: rgba(168,85,247,0.15); color: #c084fc; }' +
+      '.pv1-src-green { background: rgba(34,197,94,0.15); color: #4ade80; }' +
+      '.pv1-deps { font-size: 0.78rem; color: var(--text-muted, #64748b); font-family: monospace; }' +
+      '@media (max-width: 700px) { .pv1-table th:nth-child(3), .pv1-table td:nth-child(3) { display: none; } .pv1-table th:nth-child(4), .pv1-table td:nth-child(4) { display: none; } }' +
+      '</style>';
+
+    var html = styles + '<div class="pv1-wrap">';
+
+    // Hero header
+    html += '<div class="pv1-hero">';
+    html += '<h1>Podstawy v1 — Lista prac do wdrożenia</h1>';
+    html += '<p class="subtitle">31 funkcji niezbędnych aby firma mogła zastąpić Base.com i zacząć korzystać z OrderFlow</p>';
+    html += '<div class="pv1-context">';
+    html += '📦 <strong>Allegro.pl + WooCommerce (WordPress)</strong><br>';
+    html += '👥 4–10 pracowników, 200–500 zamówień/dzień<br>';
+    html += '🚚 Kurierzy: InPost, DPD, DHL, Poczta Polska, Wysyłam z Allegro<br>';
+    html += '🧾 Faktury VAT w systemie';
+    html += '</div>';
+    html += '</div>';
+
+    // Stats row
+    html += '<div class="pv1-stats-row">';
+    html += '<div class="pv1-stat pv1-stat-green">✅ Faza 0: 8 zadań</div>';
+    html += '<div class="pv1-stat pv1-stat-amber">🔨 Faza 1: 20 zadań</div>';
+    html += '<div class="pv1-stat pv1-stat-blue">📋 Faza 2: 14 zadań</div>';
+    html += '<div class="pv1-stat pv1-stat-gray">Razem: 42 zadania</div>';
+    html += '</div>';
+
+    // ===== FAZA 0 =====
+    html += '<div class="pv1-phase">';
+    html += '<div class="pv1-phase-header pv1-phase-header-green">';
+    html += '<span class="pv1-phase-title">⚙️ Faza 0 — Fundament (infrastruktura)</span>';
+    html += '<span class="pv1-phase-badge pv1-badge-green">Zrealizowane ✅</span>';
+    html += '</div>';
+    html += '<table class="pv1-table"><thead><tr>';
+    html += '<th>#</th><th>Funkcja</th><th>Moduł / Opis</th>';
+    html += '</tr></thead><tbody>';
+
+    var faza0 = [
+      ['F0.1', 'Architektura bazy danych PostgreSQL', 'Schemat ERD, 19 tabel'],
+      ['F0.2', 'Backend FastAPI + SQLAlchemy + Alembic migracje', 'Infrastruktura backendowa'],
+      ['F0.3', 'REST API (CRUD) — 20 endpointów', 'Warstwa API'],
+      ['F0.4', 'Autentykacja JWT + RBAC (role: admin/manager/operator/viewer)', 'Bezpieczeństwo i dostęp'],
+      ['F0.5', 'Audit Log — pełna historia zmian', 'Śledzenie zmian'],
+      ['F0.6', 'Panel admina (SPA) — login, dashboard, dark/light mode', 'Frontend'],
+      ['F0.7', 'Docker + PostgreSQL (docker-compose)', 'DevOps / Infrastruktura'],
+      ['F0.8', 'GitHub repo + deploy', 'DevOps / CI/CD'],
+    ];
+
+    faza0.forEach(function(row) {
+      html += '<tr>';
+      html += '<td><span class="pv1-num">' + row[0] + '</span></td>';
+      html += '<td><div class="pv1-feat-name">' + row[1] + '</div></td>';
+      html += '<td><div class="pv1-module">' + row[2] + '</div></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+
+    // ===== FAZA 1 =====
+    html += '<div class="pv1-phase">';
+    html += '<div class="pv1-phase-header pv1-phase-header-amber">';
+    html += '<span class="pv1-phase-title">🔨 Faza 1 — MVP (minimum żeby firma mogła zacząć)</span>';
+    html += '<span class="pv1-phase-badge pv1-badge-amber">Do realizacji 🔨</span>';
+    html += '</div>';
+    html += '<table class="pv1-table"><thead><tr>';
+    html += '<th>#</th><th>Funkcja</th><th>Źródło</th><th>Moduł OrderFlow</th><th>Zależności</th>';
+    html += '</tr></thead><tbody>';
+
+    var faza1 = [
+      ['F1.1',  'Pobieranie zamówień z Allegro',                                      'Z opisu',    'Manager Marketplace (m7)',          'F0'],
+      ['F1.2',  'Pobieranie zamówień z WooCommerce',                                  'Z opisu',    'Integracje zewnętrzne (m11)',        'F0'],
+      ['F1.3',  'Centralna lista zamówień z wielu źródeł',                            'Z opisu',    'Manager Zamówień (m1)',              'F1.1, F1.2'],
+      ['F1.4',  'Statusy zamówień (nazwa, kolor, ikona)',                             'Z opisu',    'm1 → Statusy',                      'F0'],
+      ['F1.5',  'Filtrowanie po statusie, dacie, źródle',                             'Z opisu',    'm1 → Lista zamówień',               'F1.3'],
+      ['F1.6',  'Karta zamówienia (klient, produkty, adresy, płatność)',              'Z opisu',    'm1 → Karta zamówienia',             'F1.3'],
+      ['F1.7',  'Ręczna zmiana statusu zamówienia',                                   'Z opisu',    'm1 → Statusy',                      'F1.4, F1.6'],
+      ['F1.8',  'Rejestracja/status płatności zamówienia',                            'Propozycja', 'm1 → Płatności',                    'F1.3'],
+      ['F1.9',  'Notatki/komentarze wewnętrzne na zamówieniu',                        'Propozycja', 'm1 → Karta zamówienia',             'F1.6'],
+      ['F1.10', 'Historia zmian statusu (audit log)',                                  'Propozycja', 'm1 → Karta zamówienia',             'F0.5, F1.6'],
+      ['F1.11', 'Dane firmy i konfiguracja nadawcy',                                   'Propozycja', 'Konfiguracja systemu (m15)',         'F0'],
+      ['F1.12', 'Konta pracowników (zarządzanie użytkownikami)',                        'Z opisu',    'Uprawnienia (m12)',                  'F0.4'],
+      ['F1.13', 'Role i uprawnienia (granularne)',                                      'Z opisu',    'm12 → Użytkownicy',                  'F1.12'],
+      ['F1.14', 'Konfiguracja kont kurierskich (API keys)',                             'Propozycja', 'Wysyłki (m4) → Konfiguracja',       'F0'],
+      ['F1.15', 'Dynamiczne pola formularza per kurier',                                'Propozycja', 'm4 → Konfiguracja kurierów',         'F1.14'],
+      ['F1.16', 'Integracja InPost (Paczkomaty + kurier)',                              'Z opisu',    'm4 → Integracje kurierskie',         'F1.14, F1.15'],
+      ['F1.17', 'Nadanie kuriera z poziomu zamówienia',                                 'Z opisu',    'm4 → Integracja z kurierami',        'F1.16, F1.6'],
+      ['F1.18', 'Generowanie etykiet wysyłkowych (PDF)',                                'Z opisu',    'm4 → Integracja z kurierami',        'F1.17'],
+      ['F1.19', 'Automatyczne przypisanie paczkomatu z Allegro',                        'Propozycja', 'm4 → Punkty odbioru',               'F1.1, F1.16'],
+      ['F1.20', 'Synchronizacja statusów zwrotnie do Allegro/WooCommerce',             'Propozycja', 'm7 → Synchronizacja',               'F1.1, F1.2'],
+    ];
+
+    faza1.forEach(function(row) {
+      var srcClass = row[2] === 'Z opisu' ? 'pv1-src-blue' : (row[2] === 'Propozycja' ? 'pv1-src-purple' : 'pv1-src-green');
+      html += '<tr>';
+      html += '<td><span class="pv1-num">' + row[0] + '</span></td>';
+      html += '<td><div class="pv1-feat-name">' + row[1] + '</div></td>';
+      html += '<td><span class="pv1-src ' + srcClass + '">' + row[2] + '</span></td>';
+      html += '<td><div class="pv1-module">' + row[3] + '</div></td>';
+      html += '<td><span class="pv1-deps">' + row[4] + '</span></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+
+    // ===== FAZA 2 =====
+    html += '<div class="pv1-phase">';
+    html += '<div class="pv1-phase-header pv1-phase-header-blue">';
+    html += '<span class="pv1-phase-title">📋 Faza 2 — Pełna operacyjność</span>';
+    html += '<span class="pv1-phase-badge pv1-badge-blue">Planowane 📋</span>';
+    html += '</div>';
+    html += '<table class="pv1-table"><thead><tr>';
+    html += '<th>#</th><th>Funkcja</th><th>Źródło</th><th>Moduł OrderFlow</th>';
+    html += '</tr></thead><tbody>';
+
+    var faza2 = [
+      ['F2.1',  'Integracja DPD',                                          'Z opisu',      'm4 → Integracje kurierskie'],
+      ['F2.2',  'Integracja DHL',                                          'Z opisu',      'm4 → Integracje kurierskie'],
+      ['F2.3',  'Integracja Poczta Polska',                                'Z opisu',      'm4 → Integracje kurierskie'],
+      ['F2.4',  'Integracja Wysyłam z Allegro',                            'Z opisu',      'm4 → Integracje kurierskie'],
+      ['F2.5',  'Drukowanie etykiet na drukarce termicznej',               'Z opisu',      'Drukowanie (m13)'],
+      ['F2.6',  'Mapowanie drukarki do konta użytkownika',                 'Propozycja',   'm13 → Drukowanie'],
+      ['F2.7',  'Powiadomienia o nowych zamówieniach',                     'Propozycja',   'Powiadomienia (m14)'],
+      ['F2.8',  'Śledzenie przesyłek (tracking)',                          'Propozycja',   'm4 → Integracja z kurierami'],
+      ['F2.9',  'Automatyczne e-maile statusowe do klienta',               'Propozycja',   'CRM (m9) / Powiadomienia'],
+      ['F2.10', 'Wystawianie faktur VAT',                                   'Z odpowiedzi', 'm1 → Dokumenty sprzedaży'],
+      ['F2.11', 'Masowe nadawanie przesyłek',                              'Z odpowiedzi', 'm4 → Integracja z kurierami'],
+      ['F2.12', 'Masowa zmiana statusów',                                  'Z odpowiedzi', 'm1 → Lista zamówień'],
+      ['F2.13', 'Automatyczna zmiana statusu po wydruku etykiety',         'Z opisu',      'Automatyzacja (m5)'],
+      ['F2.14', 'Silnik reguł (podstawowy)',                               'Z opisu',      'm5 → Silnik reguł'],
+    ];
+
+    faza2.forEach(function(row) {
+      var srcClass = row[2] === 'Z opisu' ? 'pv1-src-blue' : (row[2] === 'Propozycja' ? 'pv1-src-purple' : 'pv1-src-green');
+      html += '<tr>';
+      html += '<td><span class="pv1-num">' + row[0] + '</span></td>';
+      html += '<td><div class="pv1-feat-name">' + row[1] + '</div></td>';
+      html += '<td><span class="pv1-src ' + srcClass + '">' + row[2] + '</span></td>';
+      html += '<td><div class="pv1-module">' + row[3] + '</div></td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+
+    html += '</div>'; // pv1-wrap
+    html += footerHtml();
+
+    main.innerHTML = html;
+    main.scrollTop = 0;
   }
 
   // ===== OVERVIEW =====
@@ -747,6 +956,12 @@
       currentModule = moduleId;
       searchQuery = "";
       searchInput.value = "";
+      // Update URL hash for podstawy-v1
+      if (moduleId === "podstawy-v1") {
+        history.pushState(null, "", "#podstawy-v1");
+      } else if (window.location.hash === "#podstawy-v1") {
+        history.pushState(null, "", window.location.pathname + window.location.search);
+      }
       renderSidebar();
       renderContent();
       closeSidebar();
